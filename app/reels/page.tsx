@@ -10,6 +10,7 @@ import {
   Pause,
   RotateCcw,
   Zap,
+  Settings2,
 } from "lucide-react";
 
 const CSV_URL = process.env.NEXT_PUBLIC_CSV_URL || "";
@@ -19,6 +20,7 @@ export default function Reels() {
   const [hasMounted, setHasMounted] = useState(false);
   const [allowed, setAllowed] = useState(false);
   const [showToast, setShowToast] = useState(false);
+  const [isControlsOpen, setIsControlsOpen] = useState(false);
 
   // Auto-Pilot States
   const [isAutoScrolling, setIsAutoScrolling] = useState(false);
@@ -45,13 +47,11 @@ export default function Reels() {
           .map((row) => row.split(",")[0].replace(/"/g, "").trim())
           .filter((url) => url.startsWith("http"));
 
-        // Shuffle logic
         const shuffled = [...rawUrls];
         for (let i = shuffled.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
         }
-
         setVideos(shuffled);
       } catch (error) {
         console.error("Manifest Error");
@@ -62,14 +62,12 @@ export default function Reels() {
     fetchSheetData();
   }, []);
 
-  // --- 2. CONTROLS: SPACE TO PAUSE / ARROWS TO SCROLL ---
+  // --- 2. CONTROLS: KEYBOARD ---
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (!allowed) return;
-
       const container = containerRef.current;
       if (!container) return;
-
       const activeIndex = Math.round(container.scrollTop / window.innerHeight);
       const activeVideo = videoRefs.current[activeIndex];
 
@@ -96,7 +94,7 @@ export default function Reels() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
-  // --- 3. AUTO-PILOT: SCROLLING & PROGRESS ---
+  // --- 3. AUTO-PILOT ENGINE ---
   useEffect(() => {
     let scrollTimer: NodeJS.Timeout;
     let lifeTimer: NodeJS.Timeout;
@@ -140,22 +138,9 @@ export default function Reels() {
     };
   }, [isAutoScrolling, scrollInterval, totalDuration, allowed]);
 
-  // --- 4. ANTI-EXIT LOCK ---
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (isAutoScrolling) {
-        e.preventDefault();
-        e.returnValue = "";
-      }
-    };
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [isAutoScrolling]);
-
-  // --- 5. INTERSECTION: PLAY ON SCROLL ---
+  // --- 4. INTERSECTION OBSERVER ---
   useEffect(() => {
     if (!allowed || !hasMounted || videos.length === 0) return;
-
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -177,7 +162,6 @@ export default function Reels() {
       },
       { root: containerRef.current, threshold: 0.6 },
     );
-
     videoRefs.current.forEach((v) => v && observer.observe(v));
     if (sentinelRef.current) observer.observe(sentinelRef.current);
     return () => observer.disconnect();
@@ -197,65 +181,107 @@ export default function Reels() {
 
   return (
     <main className="h-dvh bg-black text-white flex flex-col overflow-hidden font-sans select-none">
-      {/* CONTROL BOARD */}
+      {/* 1. AUTO-PILOT SIDE TAB & DRAWER */}
       {allowed && (
-        <div className="fixed left-6 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-4 animate-in fade-in slide-in-from-left-8 duration-1000">
-          <div className="group relative p-6 rounded-[2.5rem] bg-black/40 border border-white/5 backdrop-blur-3xl shadow-2xl w-52">
-            <div className="flex items-center gap-2 mb-6 opacity-40">
-              <Zap size={14} fill="currentColor" />
-              <h4 className="text-[10px] font-black uppercase tracking-[0.2em]">
-                Auto-Pilot
-              </h4>
-            </div>
+        <>
+          {/* Vertical Toggle Tab */}
+          <button
+            onClick={() => setIsControlsOpen(!isControlsOpen)}
+            className={`fixed left-0 top-1/2 -translate-y-1/2 z-[60] flex items-center gap-3 px-3 py-6 rounded-r-2xl bg-white/10 border border-l-0 border-white/10 backdrop-blur-xl transition-all duration-500 ${isControlsOpen ? "opacity-0 pointer-events-none -translate-x-full" : "opacity-100"}`}
+          >
+            <Zap
+              size={14}
+              className={
+                isAutoScrolling
+                  ? "text-yellow-400 fill-yellow-400"
+                  : "text-white"
+              }
+            />
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] [writing-mode:vertical-lr] rotate-180">
+              Auto-Pilot
+            </span>
+          </button>
 
-            <div className="space-y-5">
-              <div className="space-y-2">
-                <label className="text-[9px] uppercase tracking-wider font-bold opacity-30 flex gap-2">
-                  <RotateCcw size={10} /> Swap (Sec)
-                </label>
-                <input
-                  type="number"
-                  value={scrollInterval}
-                  onChange={(e) =>
-                    setScrollInterval(Math.max(3, Number(e.target.value)))
-                  }
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs outline-none focus:border-white/30"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[9px] uppercase tracking-wider font-bold opacity-30 flex gap-2">
-                  <Clock size={10} /> Duration (Min)
-                </label>
-                <input
-                  type="number"
-                  placeholder="∞"
-                  onChange={(e) => setTotalDuration(Number(e.target.value))}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs outline-none focus:border-white/30"
-                />
-              </div>
-
+          {/* Control Panel Drawer */}
+          <div
+            className={`fixed left-4 top-1/2 -translate-y-1/2 z-[60] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] ${isControlsOpen ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-12 pointer-events-none"}`}
+          >
+            <div className="relative p-6 rounded-[2.5rem] bg-black/60 border border-white/10 backdrop-blur-3xl shadow-2xl w-56">
+              {/* Close Button Inside */}
               <button
-                onClick={() => setIsAutoScrolling(!isAutoScrolling)}
-                className={`w-full py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${
-                  isAutoScrolling
-                    ? "bg-red-500/10 text-red-400 border border-red-500/20"
-                    : "bg-white text-black"
-                }`}
+                onClick={() => setIsControlsOpen(false)}
+                className="absolute -right-2 -top-2 w-8 h-8 rounded-full bg-white text-black flex items-center justify-center shadow-xl active:scale-90"
               >
-                {isAutoScrolling ? (
-                  <Pause size={12} fill="currentColor" />
-                ) : (
-                  <Play size={12} fill="currentColor" />
-                )}
-                {isAutoScrolling ? "Stop" : "Start Engine"}
+                <ChevronRight size={16} className="rotate-180" />
               </button>
+
+              <div className="flex items-center gap-2 mb-6 opacity-40">
+                <Settings2 size={14} />
+                <h4 className="text-[10px] font-black uppercase tracking-[0.2em]">
+                  Settings
+                </h4>
+              </div>
+
+              <div className="space-y-5">
+                <div className="space-y-2">
+                  <label className="text-[9px] uppercase tracking-wider font-bold opacity-30 flex gap-2">
+                    <RotateCcw size={10} /> Swap (Sec)
+                  </label>
+                  <input
+                    type="number"
+                    value={scrollInterval}
+                    onChange={(e) =>
+                      setScrollInterval(Math.max(3, Number(e.target.value)))
+                    }
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs outline-none focus:border-white/30"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[9px] uppercase tracking-wider font-bold opacity-30 flex gap-2">
+                    <Clock size={10} /> Duration (Min)
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="∞"
+                    onChange={(e) => setTotalDuration(Number(e.target.value))}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs outline-none focus:border-white/30"
+                  />
+                </div>
+
+                <button
+                  onClick={() => {
+                    setIsAutoScrolling(!isAutoScrolling);
+                    setTimeout(() => setIsControlsOpen(false), 500); // Auto-close after starting
+                  }}
+                  className={`w-full py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${
+                    isAutoScrolling
+                      ? "bg-red-500 text-white"
+                      : "bg-white text-black"
+                  }`}
+                >
+                  {isAutoScrolling ? (
+                    <Pause size={12} fill="currentColor" />
+                  ) : (
+                    <Play size={12} fill="currentColor" />
+                  )}
+                  {isAutoScrolling ? "Stop Engine" : "Start Engine"}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+
+          {/* Overlay to close drawer when tapping video */}
+          {isControlsOpen && (
+            <div
+              className="fixed inset-0 z-[55] bg-black/20 backdrop-blur-sm"
+              onClick={() => setIsControlsOpen(false)}
+            />
+          )}
+        </>
       )}
 
-      {/* FEED CONTAINER */}
+      {/* 2. FEED CONTAINER */}
       <section
         ref={containerRef}
         className={`flex-1 snap-y snap-mandatory scrollbar-hide ${allowed ? "overflow-y-scroll" : "overflow-hidden"}`}
@@ -263,11 +289,11 @@ export default function Reels() {
         {videos.map((video, i) => (
           <div
             key={i}
-            className="w-full h-dvh snap-start flex items-center justify-center p-4"
+            className="w-full h-dvh snap-start flex items-center justify-center p-2 sm:p-4"
           >
-            <div className="relative w-full max-w-[420px] h-[88dvh] rounded-[3rem] overflow-hidden bg-zinc-950 border border-white/10 shadow-2xl">
+            <div className="relative w-full max-w-[420px] h-full sm:h-[88dvh] rounded-none sm:rounded-[3rem] overflow-hidden bg-zinc-950 border-x sm:border border-white/10 shadow-2xl">
               {isAutoScrolling && (
-                <div className="absolute top-8 left-10 right-10 h-[2px] bg-white/10 z-20 rounded-full overflow-hidden">
+                <div className="absolute top-12 left-10 right-10 h-[2px] bg-white/10 z-20 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-white/60 transition-all duration-100 ease-linear"
                     style={{ width: `${progress}%` }}
@@ -295,10 +321,10 @@ export default function Reels() {
                   <div className="mb-8 w-20 h-20 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-white/80">
                     <AlertTriangle size={32} strokeWidth={1.5} />
                   </div>
-                  <h2 className="text-3xl font-black italic tracking-tighter uppercase mb-3">
+                  <h2 className="text-3xl font-black italic tracking-tighter uppercase mb-3 text-center">
                     Sexual Content
                   </h2>
-                  <p className="text-[10px] text-white/40 uppercase tracking-[0.3em] mb-10 text-center">
+                  <p className="text-[10px] text-white/40 uppercase tracking-[0.3em] mb-10 text-center leading-relaxed">
                     Only continue if you are of legal age
                   </p>
                   <button
@@ -328,7 +354,7 @@ export default function Reels() {
         <div ref={sentinelRef} className="h-20 snap-start" />
       </section>
 
-      {/* TOAST NOTIFICATION */}
+      {/* 3. DYNAMIC TOAST */}
       <div
         className={`fixed bottom-12 left-1/2 -translate-x-1/2 z-50 transition-all duration-700 ${
           showToast || isAutoScrolling
@@ -337,7 +363,9 @@ export default function Reels() {
         }`}
       >
         <div className="px-8 py-4 rounded-full bg-black/40 border border-white/10 backdrop-blur-3xl text-[10px] uppercase tracking-[0.3em] font-black flex items-center gap-3">
-          {isAutoScrolling && <Timer size={14} className="animate-spin" />}
+          {isAutoScrolling && (
+            <Timer size={14} className="animate-spin text-white" />
+          )}
           {isAutoScrolling
             ? `Engine Active • ${Math.floor(timeLeft / 60)}m ${timeLeft % 60}s left`
             : "Feed Randomized • Endless"}
