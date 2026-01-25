@@ -1,0 +1,141 @@
+@import "tailwindcss";
+
+/* -----------------------------
+   Root theme (monochrome)
+------------------------------ */
+:root {
+    --bg: #000000;
+    --fg: #eaeaea;
+    --fg-muted: rgba(255, 255, 255, 0.6);
+    --border: rgba(255, 255, 255, 0.12);
+    --glass: rgba(255, 255, 255, 0.06);
+}
+
+/* -----------------------------
+   Base reset
+------------------------------ */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100%;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: inherit;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    scroll-behavior: smooth; /* smooth scroll for parallax & navigation */
+}
+
+/* -----------------------------
+   Typography polish
+------------------------------ */
+h1,
+h2,
+h3,
+h4 {
+    letter-spacing: -0.02em;
+    transition: color 0.3s ease;
+}
+
+p {
+    color: var(--fg-muted);
+    transition: color 0.3s ease;
+}
+
+/* -----------------------------
+   Video states
+------------------------------ */
+.video-blur {
+    filter: blur(18px) brightness(0.7);
+    transition: filter 0.4s ease;
+}
+
+video {
+    border-radius: 1rem; /* rounded rectangle edges */
+    transition:
+        transform 0.5s ease,
+        filter 0.4s ease;
+}
+
+video:hover {
+    transform: scale(1.02) rotateZ(0.2deg); /* subtle hover animation */
+}
+
+/* -----------------------------
+   Buttons
+------------------------------ */
+button {
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 9999px;
+    border: 1px solid var(--border);
+    background: var(--glass);
+    color: var(--fg);
+    padding: 0.6em 1.2em;
+}
+
+button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.05);
+}
+
+/* -----------------------------
+   Card / Group hover effect
+------------------------------ */
+.group {
+    transition:
+        transform 0.4s ease,
+        box-shadow 0.4s ease;
+}
+
+.group:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 10px 30px rgba(255, 255, 255, 0.05);
+}
+
+/* -----------------------------
+   Glassmorphism
+------------------------------ */
+.glass {
+    backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1rem;
+    transition: all 0.4s ease;
+}
+
+/* -----------------------------
+   Selection & interactions
+------------------------------ */
+::selection {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+a:hover {
+    color: white;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+}
+
+/* -----------------------------
+   Scroll / Parallax helpers
+------------------------------ */
+[data-parallax] {
+    transition: transform 0.2s ease-out;
+}
