@@ -10,14 +10,14 @@ const CATEGORIES = [
     id: "asian",
     name: "Asian",
     handle: "@AluerierFlare",
-    image: "/asia.jpeg",
+    image: "/asian.jpeg",
     icon: Star,
   },
   {
     id: "slut",
     name: "Slut",
     handle: "@AellaGirl",
-    image: "/girl.jpeg",
+    image: "/slut.jpeg",
     icon: Flame,
   },
   {
