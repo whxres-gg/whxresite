@@ -1,5 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // 1. Fixes the "Cross origin request" warning for IP 10.5.0.2
+  experimental: {
+    allowedDevOrigins: ["localhost:3000", "10.5.0.2:3000"],
+  },
+
   async headers() {
     return [
       {
@@ -11,10 +16,9 @@ const nextConfig = {
               "default-src 'self';",
               "script-src 'self' 'unsafe-eval' 'unsafe-inline';",
               "style-src 'self' 'unsafe-inline';",
-              "img-src 'self' data: blob:;",
-              // Added googleusercontent to connect-src
+              // Added https: to img-src so external test links work
+              "img-src 'self' data: blob: https:;",
               "connect-src 'self' https://docs.google.com https://*.googleusercontent.com;",
-              // Added blob: and specific video hosts to media-src
               "media-src 'self' blob: https://sfmcompile.club https://v.redd.it https://*.googlevideo.com https://*.googleusercontent.com;",
               "frame-ancestors 'none';",
             ].join(" "),
