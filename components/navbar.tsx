@@ -2,52 +2,101 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
+import { Home, Film, Trophy } from "lucide-react";
 
 export default function Navbar() {
   const pathname = usePathname();
+  const [isVisible, setIsVisible] = useState(true);
+  const touchStart = useRef<number | null>(null);
 
-  // Navbar hides on these pages until hovered
-  const isHiddenPage = pathname === "/reels" || pathname === "/fame";
+  const isReelsOrFame = pathname === "/reels" || pathname === "/fame";
 
-  const activeStyles = "bg-white/20 text-white font-bold";
-  const inactiveStyles = "text-white/50 hover:text-white font-medium";
+  // Navigation Logic
+  useEffect(() => {
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStart.current = e.touches[0].clientY;
+    };
+    const handleTouchMove = (e: TouchEvent) => {
+      if (touchStart.current === null) return;
+      const touchEnd = e.touches[0].clientY;
+      const distance = touchStart.current - touchEnd;
+      if (distance > 40) setIsVisible(false); // Hide on swipe up
+      if (distance < -40) setIsVisible(true); // Show on swipe down
+    };
+
+    window.addEventListener("touchstart", handleTouchStart);
+    window.addEventListener("touchmove", handleTouchMove);
+    return () => {
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchmove", handleTouchMove);
+    };
+  }, []);
+
+  // Soft Glass Styles
+  // Instead of solid white, we use a high-alpha white with heavy blur
+  const activeStyles =
+    "bg-white/20 border-white/40 text-white font-black shadow-[inset_0_0_12px_rgba(255,255,255,0.1)]";
+  const inactiveStyles =
+    "text-white/40 border-transparent hover:text-white/80 hover:bg-white/5";
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-[100] group h-16 pointer-events-auto">
+    <div
+      className="fixed top-0 left-0 right-0 z-[100] flex justify-center pointer-events-none"
+      onMouseEnter={() => setIsVisible(true)}
+    >
       <nav
-        className={`flex justify-center w-full pt-6 transition-transform duration-700 will-change-transform
-          ${isHiddenPage ? "-translate-y-[110%] group-hover:translate-y-0" : "translate-y-0"}
+        className={`
+          mt-6 transition-all duration-500 ease-[cubic-bezier(0.2,1,0.2,1)]
+          ${isVisible ? "translate-y-0 opacity-100" : "-translate-y-24 opacity-0"}
+          ${isReelsOrFame ? "scale-90" : "scale-100"}
+          pointer-events-auto
         `}
-        style={{
-          transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
-          transformStyle: "preserve-3d",
-          backfaceVisibility: "hidden",
-        }}
       >
-        <div className="flex gap-1 p-1 rounded-full bg-white/10 border border-white/20 backdrop-blur-xl pointer-events-auto shadow-none">
+        <div
+          className="flex items-center gap-1.5 p-1.5 rounded-full bg-black/20 border border-white/10 backdrop-blur-2xl"
+          style={{ transform: "translateZ(0)" }}
+        >
+          {/* Home Link */}
           <Link
             href="/"
-            className={`px-6 py-2 rounded-full text-sm transition-all duration-300 ${
+            className={`flex items-center gap-2 px-5 py-2 rounded-full text-[10px] uppercase tracking-[0.25em] border transition-all duration-300 ${
               pathname === "/" ? activeStyles : inactiveStyles
             }`}
           >
-            Home
+            <Home
+              size={13}
+              className={pathname === "/" ? "opacity-100" : "opacity-40"}
+            />
+            <span>Home</span>
           </Link>
+
+          {/* Reels Link */}
           <Link
             href="/reels"
-            className={`px-6 py-2 rounded-full text-sm transition-all duration-300 ${
+            className={`flex items-center gap-2 px-5 py-2 rounded-full text-[10px] uppercase tracking-[0.25em] border transition-all duration-300 ${
               pathname === "/reels" ? activeStyles : inactiveStyles
             }`}
           >
-            Reels
+            <Film
+              size={13}
+              className={pathname === "/reels" ? "opacity-100" : "opacity-40"}
+            />
+            <span>Reels</span>
           </Link>
+
+          {/* Fame Link */}
           <Link
             href="/fame"
-            className={`px-6 py-2 rounded-full text-sm transition-all duration-300 ${
+            className={`flex items-center gap-2 px-5 py-2 rounded-full text-[10px] uppercase tracking-[0.25em] border transition-all duration-300 ${
               pathname === "/fame" ? activeStyles : inactiveStyles
             }`}
           >
-            Fame
+            <Trophy
+              size={13}
+              className={pathname === "/fame" ? "opacity-100" : "opacity-40"}
+            />
+            <span>Fame</span>
           </Link>
         </div>
       </nav>
