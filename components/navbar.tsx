@@ -3,16 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { Home, Film, Trophy } from "lucide-react";
+import { Home, Film, Trophy, Zap } from "lucide-react"; // Added Zap
 
 export default function Navbar() {
   const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(true);
   const touchStart = useRef<number | null>(null);
 
-  const isReelsOrFame = pathname === "/reels" || pathname === "/fame";
+  // Added /tools to the scaled-down pages list
+  const isReelsOrFame = pathname === "/reels" || pathname === "/fame" || pathname === "/tools";
 
-  // Navigation Logic
   useEffect(() => {
     const handleTouchStart = (e: TouchEvent) => {
       touchStart.current = e.touches[0].clientY;
@@ -21,8 +21,8 @@ export default function Navbar() {
       if (touchStart.current === null) return;
       const touchEnd = e.touches[0].clientY;
       const distance = touchStart.current - touchEnd;
-      if (distance > 40) setIsVisible(false); // Hide on swipe up
-      if (distance < -40) setIsVisible(true); // Show on swipe down
+      if (distance > 40) setIsVisible(false);
+      if (distance < -40) setIsVisible(true);
     };
 
     window.addEventListener("touchstart", handleTouchStart);
@@ -33,8 +33,6 @@ export default function Navbar() {
     };
   }, []);
 
-  // Soft Glass Styles
-  // Instead of solid white, we use a high-alpha white with heavy blur
   const activeStyles =
     "bg-white/20 border-white/40 text-white font-black shadow-[inset_0_0_12px_rgba(255,255,255,0.1)]";
   const inactiveStyles =
@@ -64,10 +62,7 @@ export default function Navbar() {
               pathname === "/" ? activeStyles : inactiveStyles
             }`}
           >
-            <Home
-              size={13}
-              className={pathname === "/" ? "opacity-100" : "opacity-40"}
-            />
+            <Home size={13} className={pathname === "/" ? "opacity-100" : "opacity-40"} />
             <span>Home</span>
           </Link>
 
@@ -78,10 +73,7 @@ export default function Navbar() {
               pathname === "/reels" ? activeStyles : inactiveStyles
             }`}
           >
-            <Film
-              size={13}
-              className={pathname === "/reels" ? "opacity-100" : "opacity-40"}
-            />
+            <Film size={13} className={pathname === "/reels" ? "opacity-100" : "opacity-40"} />
             <span>Reels</span>
           </Link>
 
@@ -92,11 +84,19 @@ export default function Navbar() {
               pathname === "/fame" ? activeStyles : inactiveStyles
             }`}
           >
-            <Trophy
-              size={13}
-              className={pathname === "/fame" ? "opacity-100" : "opacity-40"}
-            />
+            <Trophy size={13} className={pathname === "/fame" ? "opacity-100" : "opacity-40"} />
             <span>Fame</span>
+          </Link>
+
+          {/* Tools Link (New) */}
+          <Link
+            href="/tools"
+            className={`flex items-center gap-2 px-5 py-2 rounded-full text-[10px] uppercase tracking-[0.25em] border transition-all duration-300 ${
+              pathname === "/tools" ? activeStyles : inactiveStyles
+            }`}
+          >
+            <Zap size={13} className={pathname === "/tools" ? "opacity-100" : "opacity-40"} />
+            <span>Tools</span>
           </Link>
         </div>
       </nav>
