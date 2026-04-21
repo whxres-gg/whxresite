@@ -3,15 +3,23 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { Home, Film, Trophy, Zap } from "lucide-react"; // Added Zap
+import { 
+  Church,      /* Sanctum */
+  Ghost,       /* Visions */
+  Moon,        /* Relics */
+  Crown        /* Dynasty */
+} from "lucide-react";
 
 export default function Navbar() {
   const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(true);
   const touchStart = useRef<number | null>(null);
 
-  // Added /tools to the scaled-down pages list
-  const isReelsOrFame = pathname === "/reels" || pathname === "/fame" || pathname === "/tools";
+  // Updated logic to exclude /tools
+  const isReelsOrFame = 
+    pathname === "/reels" || 
+    pathname === "/curated" || 
+    pathname === "/fame";
 
   useEffect(() => {
     const handleTouchStart = (e: TouchEvent) => {
@@ -34,9 +42,17 @@ export default function Navbar() {
   }, []);
 
   const activeStyles =
-    "bg-white/20 border-white/40 text-white font-black shadow-[inset_0_0_12px_rgba(255,255,255,0.1)]";
+    "bg-white/10 border-white/40 text-white shadow-[0_0_20px_rgba(255,255,255,0.1),inset_0_0_12px_rgba(255,255,255,0.05)] blur-[0.3px]";
   const inactiveStyles =
-    "text-white/40 border-transparent hover:text-white/80 hover:bg-white/5";
+    "text-white/20 border-transparent hover:text-white/60 hover:bg-white/5 hover:border-white/10";
+
+  // Cleaned up nav items
+  const navItems = [
+    { href: "/", label: "Home", icon: Church },
+    { href: "/reels", label: "Reels", icon: Ghost },
+    { href: "/curated", label: "Playlist", icon: Moon },
+    { href: "/fame", label: "Fame", icon: Crown },
+  ];
 
   return (
     <div
@@ -45,59 +61,45 @@ export default function Navbar() {
     >
       <nav
         className={`
-          mt-6 transition-all duration-500 ease-[cubic-bezier(0.2,1,0.2,1)]
+          mt-8 transition-all duration-700 ease-[cubic-bezier(0.19,1,0.22,1)]
           ${isVisible ? "translate-y-0 opacity-100" : "-translate-y-24 opacity-0"}
           ${isReelsOrFame ? "scale-90" : "scale-100"}
           pointer-events-auto
         `}
       >
         <div
-          className="flex items-center gap-1.5 p-1.5 rounded-full bg-black/20 border border-white/10 backdrop-blur-2xl"
+          className="flex items-center gap-1 p-1.5 rounded-full bg-black/40 border border-white/5 backdrop-blur-3xl shadow-2xl"
           style={{ transform: "translateZ(0)" }}
         >
-          {/* Home Link */}
-          <Link
-            href="/"
-            className={`flex items-center gap-2 px-5 py-2 rounded-full text-[10px] uppercase tracking-[0.25em] border transition-all duration-300 ${
-              pathname === "/" ? activeStyles : inactiveStyles
-            }`}
-          >
-            <Home size={13} className={pathname === "/" ? "opacity-100" : "opacity-40"} />
-            <span>Home</span>
-          </Link>
+          {navItems.map((item) => {
+            const isActive = pathname === item.href;
+            const Icon = item.icon;
 
-          {/* Reels Link */}
-          <Link
-            href="/reels"
-            className={`flex items-center gap-2 px-5 py-2 rounded-full text-[10px] uppercase tracking-[0.25em] border transition-all duration-300 ${
-              pathname === "/reels" ? activeStyles : inactiveStyles
-            }`}
-          >
-            <Film size={13} className={pathname === "/reels" ? "opacity-100" : "opacity-40"} />
-            <span>Reels</span>
-          </Link>
-
-          {/* Fame Link */}
-          <Link
-            href="/fame"
-            className={`flex items-center gap-2 px-5 py-2 rounded-full text-[10px] uppercase tracking-[0.25em] border transition-all duration-300 ${
-              pathname === "/fame" ? activeStyles : inactiveStyles
-            }`}
-          >
-            <Trophy size={13} className={pathname === "/fame" ? "opacity-100" : "opacity-40"} />
-            <span>Fame</span>
-          </Link>
-
-          {/* Tools Link (New) */}
-          <Link
-            href="/tools"
-            className={`flex items-center gap-2 px-5 py-2 rounded-full text-[10px] uppercase tracking-[0.25em] border transition-all duration-300 ${
-              pathname === "/tools" ? activeStyles : inactiveStyles
-            }`}
-          >
-            <Zap size={13} className={pathname === "/tools" ? "opacity-100" : "opacity-40"} />
-            <span>Tools</span>
-          </Link>
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`
+                  flex items-center gap-2.5 px-6 py-2.5 rounded-full 
+                  text-[9px] uppercase tracking-[0.3em] font-light
+                  border transition-all duration-500 group
+                  ${isActive ? activeStyles : inactiveStyles}
+                `}
+              >
+                <Icon 
+                  size={14} 
+                  strokeWidth={isActive ? 1.5 : 1}
+                  className={`
+                    transition-all duration-500 
+                    ${isActive ? "opacity-100 scale-110 drop-shadow-[0_0_5px_rgba(255,255,255,0.8)]" : "opacity-30 group-hover:opacity-100"}
+                  `} 
+                />
+                <span className={isActive ? "opacity-100" : "opacity-80 group-hover:opacity-100"}>
+                  {item.label}
+                </span>
+              </Link>
+            );
+          })}
         </div>
       </nav>
     </div>

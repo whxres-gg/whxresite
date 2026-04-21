@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { Lock, Ghost } from "lucide-react";
 
 export default function GhostMode() {
-  const [isGhost, setIsGhost] = useState(false);
-
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Trigger on Enter key
-      if (e.key === "Enter") {
-        setIsGhost((prev) => !prev);
+      // Trigger on Enter OR specifically the Left Shift key
+      // e.code is more reliable for specific side-keys than e.key
+      if (e.key === "Enter" || e.code === "ShiftLeft") {
+        window.location.href = "https://www.indeed.com/jobs?q=software+engineer&l=Remote&vjk=403c945b0845a7b8";
       }
     };
 
@@ -17,78 +17,50 @@ export default function GhostMode() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  if (!isGhost) return null;
-
   return (
-    <div className="fixed inset-0 z-[9999] bg-[#0d1117] text-[#c9d1d9] font-mono p-12 overflow-auto select-none">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center gap-3 mb-8 text-sm text-gray-500 border-b border-gray-800 pb-4">
-          <span className="bg-gray-800 px-2 py-1 rounded text-gray-300">
-            GET
+    <>
+      {/* 1. SIDE VERTICAL TAB (Middle Right) */}
+      <div 
+        className="fixed right-0 top-1/2 -translate-y-1/2 z-[9998] flex items-center pointer-events-auto group"
+        title="System Integrity Status: SECURE"
+      >
+        <div className="w-1 h-16 bg-white/5 rounded-l-full backdrop-blur-sm border border-r-0 border-white/10 transition-all duration-500 group-hover:w-8 group-hover:bg-white/10 group-hover:border-white/20 flex flex-col items-center justify-center gap-2 overflow-hidden">
+          <Lock size={12} className="text-white/10 group-hover:text-green-500/80 transition-colors duration-500 delay-100" />
+          
+          <span className="absolute rotate-90 text-[7px] font-black uppercase tracking-[0.4em] text-white/0 group-hover:text-white/40 transition-colors duration-700 whitespace-nowrap origin-center translate-x-6 group-hover:translate-x-0">
+            SYSTEM LOGS
           </span>
-          <span>/v1/api/system-logs/archive_2026.json</span>
         </div>
-
-        <div className="space-y-6">
-          <section>
-            <h1 className="text-xl font-bold text-blue-400 mb-2 underline">
-              System Architecture Review
-            </h1>
-            <p className="text-sm leading-relaxed text-gray-400">
-              The following data represents a snapshot of the distributed
-              microservices cluster. Ensure all environment variables are
-              decrypted before proceeding with the production build.
-            </p>
-          </section>
-
-          <div className="bg-black/40 p-6 rounded-xl border border-gray-800 font-mono text-sm leading-relaxed shadow-inner">
-            <div className="text-green-500">
-              ✔ Success: Connection established to database cluster 'delta-9'
-            </div>
-            <div className="text-blue-400">
-              ℹ Info: Indexing files in /usr/local/bin...
-            </div>
-            <div className="text-yellow-500/70">
-              ⚠ Warning: Latency detected in Asia-Pacific region
-            </div>
-            <br />
-            <div className="text-gray-500">
-              {`{`}
-              <div className="pl-4 italic">
-                "status": "active",
-                <br />
-                "uptime": "14,209 seconds",
-                <br />
-                "load_balancer": "nginx/1.21.6",
-                <br />
-                "active_processes": [5502, 1209, 8821, 4402]
-              </div>
-              {`}`}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="h-32 bg-gray-900/50 rounded-lg border border-gray-800 flex items-center justify-center">
-              <div className="text-[10px] text-gray-600 uppercase tracking-widest text-center">
-                Memory Distribution
-                <br />
-                <span className="text-lg text-gray-400 font-bold">78.4%</span>
-              </div>
-            </div>
-            <div className="h-32 bg-gray-900/50 rounded-lg border border-gray-800 flex items-center justify-center">
-              <div className="text-[10px] text-gray-600 uppercase tracking-widest text-center">
-                CPU Overhead
-                <br />
-                <span className="text-lg text-gray-400 font-bold">12.1%</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <p className="mt-12 text-[10px] text-gray-700 uppercase tracking-tighter">
-          Internal Use Only — Confidential — (C) 2026 DevCorp Systems
-        </p>
       </div>
-    </div>
+
+      {/* 2. SUBTLE KEY HINT (Bottom Right) */}
+      <div className="fixed bottom-4 right-4 z-[9998] pointer-events-auto group">
+        <div className="flex items-center gap-3 px-3 py-2 rounded-full bg-white/[0.02] border border-white/0 hover:border-white/10 hover:bg-white/5 backdrop-blur-md transition-all duration-500">
+          {/* Subtle Ghost Icon */}
+          <Ghost size={12} className="text-white/10 group-hover:text-white/40 transition-colors" />
+          
+          {/* Hidden text revealed on hover */}
+          <div className="max-w-0 overflow-hidden group-hover:max-w-[200px] transition-all duration-500 ease-in-out">
+            <p className="text-[8px] font-bold uppercase tracking-widest text-white/30 whitespace-nowrap pr-2">
+              Ghost: <span className="text-white/60">L-Shift</span> or <span className="text-white/60">Enter</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. HIDDEN STRUCTURE FOR ACCESSIBILITY (SEO COVER) */}
+      <div className="sr-only">
+        <h1>Senior Software Engineer - Distributed Systems</h1>
+        <p>Success: Connection established to database cluster &apos;delta-9&apos;</p>
+        <pre>
+          {`{
+            "status": "active",
+            "node": "us-east-1",
+            "uptime": "14,209_seconds",
+            "security": "WAF_ENABLED"
+          }`}
+        </pre>
+      </div>
+    </>
   );
 }

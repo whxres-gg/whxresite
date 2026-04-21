@@ -1,7 +1,40 @@
 @import "tailwindcss";
 
+/* -----------------------------------------------------------
+   1. GLOBAL SCROLLBAR REMOVAL (The "Nuclear Option")
+   Targeting all browsers, elements, and internal containers.
+----------------------------------------------------------- */
+
+/* Target every element (including iframes and modals) */
+* {
+    -ms-overflow-style: none !important;  /* IE and Edge */
+    scrollbar-width: none !important;     /* Firefox */
+}
+
+/* Target Chrome, Safari, and all Webkit browsers */
+*::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+/* Ensure the root containers are silenced */
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100%;
+    background: #000000; /* Fallback before var loads */
+    color: #eaeaea;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+}
+
 /* -----------------------------
-   Root theme (monochrome)
+    2. Root theme (monochrome)
 ------------------------------ */
 :root {
     --bg: #000000;
@@ -12,7 +45,7 @@
 }
 
 /* -----------------------------
-   Base reset
+    3. Base reset & Typography
 ------------------------------ */
 *,
 *::before,
@@ -20,24 +53,14 @@
     box-sizing: border-box;
 }
 
-html,
 body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    min-height: 100%;
     background: var(--bg);
     color: var(--fg);
     font-family: inherit;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    overflow-x: hidden;
-    scroll-behavior: smooth; /* smooth scroll for parallax & navigation */
 }
 
-/* -----------------------------
-   Typography polish
------------------------------- */
 h1,
 h2,
 h3,
@@ -52,7 +75,7 @@ p {
 }
 
 /* -----------------------------
-   Video states
+    4. Video & Component States
 ------------------------------ */
 .video-blur {
     filter: blur(18px) brightness(0.7);
@@ -60,18 +83,18 @@ p {
 }
 
 video {
-    border-radius: 1rem; /* rounded rectangle edges */
+    border-radius: 1rem;
     transition:
         transform 0.5s ease,
         filter 0.4s ease;
 }
 
 video:hover {
-    transform: scale(1.02) rotateZ(0.2deg); /* subtle hover animation */
+    transform: scale(1.02) rotateZ(0.2deg);
 }
 
 /* -----------------------------
-   Buttons
+    5. Buttons
 ------------------------------ */
 button {
     font-family: inherit;
@@ -91,7 +114,7 @@ button:hover {
 }
 
 /* -----------------------------
-   Card / Group hover effect
+    6. Layout Helpers
 ------------------------------ */
 .group {
     transition:
@@ -104,9 +127,6 @@ button:hover {
     box-shadow: 0 10px 30px rgba(255, 255, 255, 0.05);
 }
 
-/* -----------------------------
-   Glassmorphism
------------------------------- */
 .glass {
     backdrop-filter: blur(12px);
     background: rgba(255, 255, 255, 0.05);
@@ -116,7 +136,7 @@ button:hover {
 }
 
 /* -----------------------------
-   Selection & interactions
+    7. Selection & Links
 ------------------------------ */
 ::selection {
     background: rgba(255, 255, 255, 0.15);
@@ -134,8 +154,18 @@ a:hover {
 }
 
 /* -----------------------------
-   Scroll / Parallax helpers
+    8. Utility Helpers
 ------------------------------ */
 [data-parallax] {
     transition: transform 0.2s ease-out;
+}
+
+/* Ensure no scrollbar on the modal overlay */
+.scrollbar-hide {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none !important;
 }
