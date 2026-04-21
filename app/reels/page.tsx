@@ -29,17 +29,14 @@ export default function Reels() {
 
     const fetchSheetData = async () => {
       try {
-        // Cache busting with timestamp
         const response = await fetch(`${CSV_URL}&t=${Date.now()}`);
         const csvText = await response.text();
         
-        // Robust CSV split: Handles different line endings and trims whitespace
         const rows = csvText.split(/\r?\n/).filter((row) => row.trim() !== "");
         
         const rawUrls = rows
-          .slice(1) // Skip "Video URL" header
+          .slice(1) 
           .map((row) => {
-            // Take the first column, remove quotes, and trim
             return row.split(",")[0].replace(/["']/g, "").trim();
           })
           .filter((url) => url.startsWith("http"));
@@ -164,11 +161,11 @@ export default function Reels() {
                   <video
                     ref={(el) => { videoRefs.current[i] = el; }}
                     data-index={i}
-                    // FIXED: Pass undefined instead of empty string
                     src={allowed && isNear ? url : undefined}
                     loop
                     muted
                     playsInline
+                    crossOrigin="anonymous" // FIX: Mandatory for COEP headers
                     preload={isNear ? "auto" : "none"}
                     className={`w-full h-full object-cover transition-opacity duration-1000 ${!allowed ? "blur-3xl opacity-20" : "opacity-100"}`}
                   />

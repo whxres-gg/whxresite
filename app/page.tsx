@@ -17,24 +17,19 @@ const CARD_CONTENT = [
 ];
 
 export default function Home() {
-  // Fix: Default hasMounted to false, then set to true once in useEffect
   const [hasMounted, setHasMounted] = useState(false);
   const [allowed, setAllowed] = useState(false);
   const heroRef = useRef<HTMLVideoElement>(null);
   const cardRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
   useEffect(() => {
-    // 1. Mark as mounted
     setHasMounted(true);
-    
-    // 2. Sync Auth
     const isAuth = localStorage.getItem("whxres-auth") === "true";
     if (isAuth) {
       setAllowed(true);
     }
   }, []);
 
-  // Use a separate effect to trigger play once 'allowed' changes
   useEffect(() => {
     if (allowed && hasMounted) {
       const timer = setTimeout(() => {
@@ -50,7 +45,6 @@ export default function Home() {
     setAllowed(true);
   };
 
-  // Prevent hydration mismatch by returning a shell until mounted
   if (!hasMounted) {
     return <div className="min-h-screen bg-[#050505]" />;
   }
@@ -103,6 +97,7 @@ export default function Home() {
             loop
             muted
             playsInline
+            crossOrigin="anonymous" // FIX: Allows cross-origin loading under COEP
             className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
@@ -127,6 +122,7 @@ export default function Home() {
                   loop
                   muted
                   playsInline
+                  crossOrigin="anonymous" // FIX: Allows cross-origin loading under COEP
                   src={allowed ? video : undefined}
                   className="w-full h-full object-cover opacity-40 group-hover:opacity-100 transition-all duration-1000"
                 />
